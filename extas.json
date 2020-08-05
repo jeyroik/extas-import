@@ -1,0 +1,25 @@
+{
+  "name": "extas/import",
+  "plugins": [
+    {
+      "class": "extas\\components\\plugins\\export\\PluginExportByField",
+      "stage": "extas.package.export.build.plugins",
+      "parameters": {
+        "field": {
+          "name": "field",
+          "value": "class"
+        }
+      }
+    },
+    {
+      "class": "extas\\components\\plugins\\export\\PluginExportByField",
+      "stage": "extas.package.export.build.extensions",
+      "parameters": {
+        "field": {
+          "name": "field",
+          "value": "class"
+        }
+      }
+    }
+  ]
+}
