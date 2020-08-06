@@ -2,7 +2,7 @@
 namespace extas\components\packages;
 
 use extas\components\Item;
-use extas\components\THasName;
+use extas\components\samples\parameters\THasSampleParameters;
 use extas\interfaces\packages\IPackageImport;
 
 /**
@@ -13,25 +13,14 @@ use extas\interfaces\packages\IPackageImport;
  */
 class PackageImport extends Item implements IPackageImport
 {
-    use THasName;
+    use THasSampleParameters;
 
     /**
      * @return array
      */
-    public function getImport(): array
+    public function getFrom(): array
     {
-        return $this->config[static::FIELD__IMPORT] ?? [];
-    }
-
-    /**
-     * @param array $import
-     * @return $this|IPackageImport
-     */
-    public function setImport(array $import): IPackageImport
-    {
-        $this->config[static::FIELD__IMPORT] = $import;
-
-        return $this;
+        return $this->config[static::FIELD__FROM] ?? [];
     }
 
     /**

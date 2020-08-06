@@ -3,23 +3,22 @@
   "plugins": [
     {
       "class": "extas\\components\\plugins\\export\\PluginExportByField",
-      "stage": "extas.package.export.build.plugins",
+      "stage": [
+        "extas.package.export.build.plugins",
+        "extas.package.export.build.extensions"
+      ],
       "parameters": {
         "field": {
           "name": "field",
           "value": "class"
         }
-      }
+      },
+      "install_on": "initialization"
     },
     {
-      "class": "extas\\components\\plugins\\export\\PluginExportByField",
-      "stage": "extas.package.export.build.extensions",
-      "parameters": {
-        "field": {
-          "name": "field",
-          "value": "class"
-        }
-      }
+      "class": "extas\\components\\plugins\\PluginImport",
+      "stage": "extas.install",
+      "install_on": "initialization"
     }
   ]
 }

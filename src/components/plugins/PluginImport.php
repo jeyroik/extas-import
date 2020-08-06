@@ -1,9 +1,10 @@
 <?php
 namespace extas\components\plugins;
 
+use extas\components\exceptions\MissedOrUnknown;
 use extas\components\packages\CrawlerExtas;
 use extas\components\packages\Installer;
-use extas\components\packages\PackageImportRepository;
+use extas\components\packages\PackageImport;
 use extas\components\THasIO;
 use extas\interfaces\packages\IPackageImport;
 use extas\interfaces\stages\IStageInstall;
@@ -18,6 +19,9 @@ use extas\interfaces\stages\IStagePackageExportBuild;
 class PluginImport extends Plugin implements IStageInstall
 {
     use THasIO;
+
+    public const SECTION__IMPORT = 'import';
+    public const SECTION__EXPORT = 'export';
 
     /**
      * @param array $packages
@@ -41,55 +45,79 @@ class PluginImport extends Plugin implements IStageInstall
      */
     protected function preparePackages(array $packages): array
     {
-        $main = $this->getMainName($packages);
-
-        if (!$main) {
-            return [];
-        }
-
-        $import = $this->getImport($main);
+        $import = $this->getImport($packages);
 
         if (!$import) {
             return [];
         }
 
         $byName = array_column($packages, null, 'name');
-        $importConfig = $import->getImport();
-
         $export = [];
+        $from = $import->getFrom();
+        $onMiss = $import->getParameterValue($import::PARAM__ON_MISS_PACKAGE, $import::ON_MISS__CONTINUE);
 
-        foreach ($importConfig as $exportPackageName => $importList) {
-            if (!isset($byName[$exportPackageName]) || !isset($byName[$exportPackageName]['export'])) {
-                continue;
+        foreach ($from as $exportPackageName => $importList) {
+            if ($this->canBeExported($byName, $exportPackageName)) {
+                $export[$exportPackageName] = $this->constructExport(
+                    $exportPackageName,
+                    $byName[$exportPackageName][static::SECTION__EXPORT],
+                    $importList,
+                    $import
+                );
+            } else {
+                if ($onMiss == $import::ON_MISS__CONTINUE) {
+                    continue;
+                }
+                throw new MissedOrUnknown(
+                    'package "' . $exportPackageName . '" for export or section "' . static::SECTION__EXPORT . '"'
+                );
             }
-
-            $export[$exportPackageName] = $this->constructExport($byName[$exportPackageName]['export'], $importList);
         }
 
         return $export;
     }
 
     /**
+     * @param array $byName
+     * @param string $name
+     * @return bool
+     */
+    protected function canBeExported(array $byName, string $name)
+    {
+        return isset($byName[$name]) && isset($byName[$name][static::SECTION__EXPORT]);
+    }
+
+    /**
+     * @param string $name
      * @param array $exportPackage
      * @param array $importList
+     * @param IPackageImport $import
      * @return array
+     * @throws MissedOrUnknown
      */
-    protected function constructExport(array $exportPackage, array $importList): array
+    protected function constructExport(
+        string $name,
+        array $exportPackage,
+        array $importList,
+        IPackageImport $import
+    ): array
     {
-        $export = [
-            'name' => $exportPackage['name']
-        ];
+        $export = ['name' => $name];
+        $onMiss = $import->getParameterValue($import::PARAM__ON_MISS_SECTION, $import::ON_MISS__CONTINUE);
 
         foreach ($importList as $sectionName => $sectionList) {
             if (!isset($exportPackage[$sectionName])) {
-                continue;
+                if ($onMiss == $import::ON_MISS__CONTINUE) {
+                    continue;
+                }
+                throw new MissedOrUnknown('section "' . $sectionName . '" for export in the "' . $export['name'] . '"');
             }
 
             if (is_string($sectionList) && ($sectionList == '*')) {
                 $export[$sectionName] = $exportPackage[$sectionName];
             }
 
-            $this->constructCustomExport($export, $sectionName, $sectionList);
+            $this->constructCustomExport($export, $exportPackage, $sectionName, $sectionList);
         }
 
         return $export;
@@ -103,13 +131,16 @@ class PluginImport extends Plugin implements IStageInstall
      * @return array
      */
     protected function constructCustomExport(
-        array $export,
+        array &$export,
         array $exportPackage,
         string $sectionName,
         $sectionList
     ): array
     {
         foreach ($this->getPluginsByStage(IStagePackageExportBuild::NAME . '.' . $sectionName) as $plugin) {
+            /**
+             * @var IStagePackageExportBuild $plugin
+             */
             if ($plugin($export, $exportPackage, $sectionName, $sectionList)) {
                 return $export;
             }
@@ -125,39 +156,19 @@ class PluginImport extends Plugin implements IStageInstall
     }
 
     /**
-     * @param string $name
-     * @return IPackageImport
-     * @throws \Exception
-     */
-    protected function getImport(string $name): IPackageImport
-    {
-        $repo = new PackageImportRepository();
-
-        /**
-         * @var IPackageImport $import
-         */
-        $import = $repo->one([IPackageImport::FIELD__NAME => $name]);
-
-        return $import;
-    }
-
-    /**
      * @param array $packages
-     * @return string
+     * @return IPackageImport|null
      */
-    protected function getMainName(array $packages): string
+    protected function getImport(array $packages): ?IPackageImport
     {
-        $byName = array_column($packages, CrawlerExtas::FIELD__WORKING_DIRECTORY, 'name');
+        $byName = array_column($packages, null, CrawlerExtas::FIELD__WORKING_DIRECTORY);
 
-        $main = '';
-
-        foreach ($byName as $name => $wd) {
-            if (strpos($wd, 'vendor') === false) {
-                $main = $name;
-                break;
+        foreach ($byName as $wd => $config) {
+            if ((strpos($wd, 'vendor') === false) && isset($config[static::SECTION__IMPORT])) {
+                return new PackageImport($config[static::SECTION__IMPORT]);
             }
         }
 
-        return $main;
+        return null;
     }
 }
