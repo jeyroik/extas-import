@@ -110,10 +110,6 @@ class PluginImport extends Plugin implements IStageInstall
                 continue;
             }
 
-            if (is_string($sectionList) && ($sectionList == '*')) {
-                $export[$sectionName] = $exportPackage[$sectionName];
-            }
-
             $this->constructCustomExport($export, $exportPackage, $sectionName, $sectionList);
         }
 
