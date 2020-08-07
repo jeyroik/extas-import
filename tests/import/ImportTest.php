@@ -75,7 +75,7 @@ class ImportTest extends TestCase
 
         $plugins = $this->allSnuffRepos('pluginRepo');
         $this->assertCount(
-            5,
+            6,
             $plugins,
             'Not enough plugins: ' . print_r($plugins, true) . PHP_EOL . $output->fetch()
         );
@@ -96,7 +96,7 @@ class ImportTest extends TestCase
         $plugin($packages, $generatedData);
 
         $plugins = $this->allSnuffRepos('pluginRepo');
-        $this->assertCount(3, $plugins, 'Not enough plugins: ' . print_r($plugins, true));
+        $this->assertCount(4, $plugins, 'Not enough plugins: ' . print_r($plugins, true));
     }
 
     public function testMissedExportPackageContinue()
@@ -119,7 +119,7 @@ class ImportTest extends TestCase
         $plugin($packages, $generatedData);
 
         $plugins = $this->allSnuffRepos('pluginRepo');
-        $this->assertCount(3, $plugins, 'Not enough plugins: ' . print_r($plugins, true));
+        $this->assertCount(4, $plugins, 'Not enough plugins: ' . print_r($plugins, true));
     }
 
     public function testMissedExportPackageThrowAnError()
@@ -166,7 +166,7 @@ class ImportTest extends TestCase
         $plugin($packages, $generatedData);
 
         $plugins = $this->allSnuffRepos('pluginRepo');
-        $this->assertCount(5, $plugins, 'Not enough plugins: ' . print_r($plugins, true));
+        $this->assertCount(6, $plugins, 'Not enough plugins: ' . print_r($plugins, true));
 
         $extensions = $this->allSnuffRepos('extRepo');
         $this->assertCount(
@@ -222,8 +222,8 @@ class ImportTest extends TestCase
         $plugin($packages, $generatedData);
 
         $plugins = $this->allSnuffRepos('pluginRepo');
-        // 2 - PluginExportByField, 1 - PluginImport +3 PluginEmpty from export
-        $this->assertCount(6, $plugins, 'Not enough plugins: ' . print_r($plugins, true));
+        // 2 - PluginExportByField, 1 - PluginImport, 1 - PluginExportByWildcard +3 PluginEmpty from export
+        $this->assertCount(7, $plugins, 'Not enough plugins: ' . print_r($plugins, true));
     }
 
     public function testValidByGeneralPlugin()

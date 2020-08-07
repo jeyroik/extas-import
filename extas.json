@@ -16,6 +16,11 @@
       "install_on": "initialization"
     },
     {
+      "class": "extas\\components\\plugins\\export\\PluginExportByWildcard",
+      "stage": "extas.package.export.build",
+      "install_on": "initialization"
+    },
+    {
       "class": "extas\\components\\plugins\\PluginImport",
       "stage": "extas.install",
       "install_on": "initialization"

@@ -1,6 +1,6 @@
 ![tests](https://github.com/jeyroik/extas-installer-import/workflows/PHP%20Composer/badge.svg?branch=master&event=push)
 ![codecov.io](https://codecov.io/gh/jeyroik/extas-installer-import/coverage.svg?branch=master)
-
+<a href="https://codeclimate.com/github/jeyroik/extas-installer-import/maintainability"><img src="https://api.codeclimate.com/v1/badges/0ed70b5194e29f992110/maintainability" /></a>
 [![Latest Stable Version](https://poser.pugx.org/jeyroik/extas-installer-import/v)](//packagist.org/packages/jeyroik/extas-jsonrpc)
 [![Total Downloads](https://poser.pugx.org/jeyroik/extas-installer-import/downloads)](//packagist.org/packages/jeyroik/extas-jsonrpc)
 [![Dependents](https://poser.pugx.org/jeyroik/extas-installer-import/dependents)](//packagist.org/packages/jeyroik/extas-jsonrpc)

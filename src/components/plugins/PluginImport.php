@@ -106,11 +106,8 @@ class PluginImport extends Plugin implements IStageInstall
         $onMiss = $import->getParameterValue($import::PARAM__ON_MISS_SECTION, $import::ON_MISS__CONTINUE);
 
         foreach ($importList as $sectionName => $sectionList) {
-            if (!isset($exportPackage[$sectionName])) {
-                if ($onMiss == $import::ON_MISS__CONTINUE) {
-                    continue;
-                }
-                throw new MissedOrUnknown('section "' . $sectionName . '" for export in the "' . $export['name'] . '"');
+            if ($this->isContinue($exportPackage, $sectionName, $onMiss, $export)) {
+                continue;
             }
 
             if (is_string($sectionList) && ($sectionList == '*')) {
@@ -121,6 +118,18 @@ class PluginImport extends Plugin implements IStageInstall
         }
 
         return $export;
+    }
+
+    protected function isContinue(array $exportPackage, string $sectionName, string $onMiss, array $export): bool
+    {
+        if (!isset($exportPackage[$sectionName])) {
+            if ($onMiss == IPackageImport::ON_MISS__CONTINUE) {
+                return true;
+            }
+            throw new MissedOrUnknown('section "' . $sectionName . '" for export in the "' . $export['name'] . '"');
+        }
+
+        return false;
     }
 
     /**
