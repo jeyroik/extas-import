@@ -64,15 +64,15 @@ class PluginImport extends Plugin implements IStageInstall
                     $importList,
                     $import
                 );
+            } elseif ($onMiss == $import::ON_MISS__CONTINUE) {
+                continue;
             } else {
-                if ($onMiss == $import::ON_MISS__CONTINUE) {
-                    continue;
-                }
                 throw new MissedOrUnknown(
                     'package "' . $exportPackageName . '" for export or section "' . static::SECTION__EXPORT . '"'
                 );
             }
         }
+
 
         return $export;
     }
@@ -116,6 +116,14 @@ class PluginImport extends Plugin implements IStageInstall
         return $export;
     }
 
+    /**
+     * @param array $exportPackage
+     * @param string $sectionName
+     * @param string $onMiss
+     * @param array $export
+     * @return bool
+     * @throws MissedOrUnknown
+     */
     protected function isContinue(array $exportPackage, string $sectionName, string $onMiss, array $export): bool
     {
         if (!isset($exportPackage[$sectionName])) {
