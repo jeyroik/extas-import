@@ -7,12 +7,14 @@ use extas\components\extensions\ExtensionRepository;
 use extas\components\packages\CrawlerExtas;
 use extas\components\packages\Initializer;
 use extas\components\packages\PackageImport;
+use extas\components\plugins\export\PluginExportByWildcard;
 use extas\components\plugins\Plugin;
 use extas\components\plugins\PluginEmpty;
 use extas\components\plugins\PluginException;
 use extas\components\plugins\export\PluginExportByField;
 use extas\components\plugins\PluginImport;
 use extas\components\plugins\PluginRepository;
+use extas\components\plugins\TSnuffPlugins;
 use extas\components\repositories\TSnuffRepository;
 use extas\interfaces\extensions\IExtension;
 use extas\interfaces\IHasIO;
@@ -33,6 +35,7 @@ class ImportTest extends TestCase
 {
     use TSnuffRepository;
     use TSnuffConsole;
+    use TSnuffPlugins;
 
     protected function setUp(): void
     {
@@ -51,6 +54,7 @@ class ImportTest extends TestCase
     public function tearDown(): void
     {
         $this->unregisterSnuffRepos();
+        $this->deleteSnuffPlugins();
     }
 
     public function testValid()
@@ -77,7 +81,7 @@ class ImportTest extends TestCase
         $this->assertCount(
             6,
             $plugins,
-            'Not enough plugins: ' . '###' . PHP_EOL . $output->fetch()
+            'Not enough plugins: ' . print_r($plugins, true) . PHP_EOL . $output->fetch()
         );
     }
 
@@ -96,7 +100,7 @@ class ImportTest extends TestCase
         $plugin($packages, $generatedData);
 
         $plugins = $this->allSnuffRepos('pluginRepo');
-        $this->assertCount(4, $plugins, 'Not enough plugins: ' . '###');
+        $this->assertCount(4, $plugins, 'Not enough plugins: ' . print_r($plugins, true));
     }
 
     public function testMissedExportPackageContinue()
@@ -119,7 +123,7 @@ class ImportTest extends TestCase
         $plugin($packages, $generatedData);
 
         $plugins = $this->allSnuffRepos('pluginRepo');
-        $this->assertCount(4, $plugins, 'Not enough plugins: ' . '###');
+        $this->assertCount(4, $plugins, 'Not enough plugins: ' . print_r($plugins, true));
     }
 
     public function testMissedExportPackageThrowAnError()
@@ -166,7 +170,7 @@ class ImportTest extends TestCase
         $plugin($packages, $generatedData);
 
         $plugins = $this->allSnuffRepos('pluginRepo');
-        $this->assertCount(6, $plugins, 'Not enough plugins: ' . '###');
+        $this->assertCount(6, $plugins, 'Not enough plugins: ' . print_r($plugins, true));
 
         $extensions = $this->allSnuffRepos('extRepo');
         $this->assertCount(
@@ -223,7 +227,36 @@ class ImportTest extends TestCase
 
         $plugins = $this->allSnuffRepos('pluginRepo');
         // 2 - PluginExportByField, 1 - PluginImport, 1 - PluginExportByWildcard +3 PluginEmpty from export
-        $this->assertCount(7, $plugins, 'Not enough plugins: ' . '###');
+        $this->assertCount(7, $plugins, 'Not enough plugins: ' . print_r($plugins, true));
+    }
+
+    public function testFailedExportWildcard()
+    {
+        $output = $this->getOutput(true);
+        $packages = [
+            $this->getImportPackage(
+                IPackageImport::ON_MISS__CONTINUE,
+                IPackageImport::ON_MISS__CONTINUE,
+                false
+            ),
+            $this->getExportPackage()
+        ];
+        $generatedData = [];
+
+        $this->createWithSnuffRepo('pluginRepo', new Plugin([
+            Plugin::FIELD__CLASS => PluginExportByWildcard::class,
+            Plugin::FIELD__STAGE => IStagePackageExportBuild::NAME
+        ]));
+
+        $plugin = new PluginImport([
+            IHasIO::FIELD__INPUT => $this->getInput(),
+            IHasIO::FIELD__OUTPUT => $output
+        ]);
+        $plugin($packages, $generatedData);
+
+        $plugins = $this->allSnuffRepos('pluginRepo');
+        // 2 - PluginExportByField, 1 - PluginImport, 1 - PluginExportByWildcard +3 PluginEmpty from export
+        $this->assertCount(1, $plugins, 'Not enough plugins: ' . '###');
     }
 
     public function testValidByGeneralPlugin()
@@ -257,16 +290,16 @@ class ImportTest extends TestCase
 
         $plugins = $this->allSnuffRepos('pluginRepo');
         // 1 - PluginExportByField +2 PluginEmpty from export
-        $this->assertCount(3, $plugins, 'Not enough plugins: ' . '###');
+        $this->assertCount(3, $plugins, 'Not enough plugins: ' . print_r($plugins, true));
     }
 
     protected function selfInstall(OutputInterface  $output): void
     {
-        $installer = new Initializer([
+        $initializer = new Initializer([
             Initializer::FIELD__INPUT => $this->getInput(),
             Initializer::FIELD__OUTPUT => $output
         ]);
-        $installer->run([
+        $initializer->run([
             'extas/import' => json_decode(file_get_contents(getcwd() . '/extas.json'), true)
         ]);
     }
