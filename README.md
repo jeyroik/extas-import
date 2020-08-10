@@ -70,7 +70,7 @@
         "value": "continue"
       },
       "on_miss_section": {
-        "name": "on_miss_package",
+        "name": "on_miss_section",
         "value": "throw"
       }
     }

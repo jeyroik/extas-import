@@ -77,7 +77,7 @@ class ImportTest extends TestCase
         $this->assertCount(
             6,
             $plugins,
-            'Not enough plugins: ' . print_r($plugins, true) . PHP_EOL . $output->fetch()
+            'Not enough plugins: ' . '###' . PHP_EOL . $output->fetch()
         );
     }
 
@@ -96,7 +96,7 @@ class ImportTest extends TestCase
         $plugin($packages, $generatedData);
 
         $plugins = $this->allSnuffRepos('pluginRepo');
-        $this->assertCount(4, $plugins, 'Not enough plugins: ' . print_r($plugins, true));
+        $this->assertCount(4, $plugins, 'Not enough plugins: ' . '###');
     }
 
     public function testMissedExportPackageContinue()
@@ -119,7 +119,7 @@ class ImportTest extends TestCase
         $plugin($packages, $generatedData);
 
         $plugins = $this->allSnuffRepos('pluginRepo');
-        $this->assertCount(4, $plugins, 'Not enough plugins: ' . print_r($plugins, true));
+        $this->assertCount(4, $plugins, 'Not enough plugins: ' . '###');
     }
 
     public function testMissedExportPackageThrowAnError()
@@ -166,7 +166,7 @@ class ImportTest extends TestCase
         $plugin($packages, $generatedData);
 
         $plugins = $this->allSnuffRepos('pluginRepo');
-        $this->assertCount(6, $plugins, 'Not enough plugins: ' . print_r($plugins, true));
+        $this->assertCount(6, $plugins, 'Not enough plugins: ' . '###');
 
         $extensions = $this->allSnuffRepos('extRepo');
         $this->assertCount(
@@ -223,7 +223,7 @@ class ImportTest extends TestCase
 
         $plugins = $this->allSnuffRepos('pluginRepo');
         // 2 - PluginExportByField, 1 - PluginImport, 1 - PluginExportByWildcard +3 PluginEmpty from export
-        $this->assertCount(7, $plugins, 'Not enough plugins: ' . print_r($plugins, true));
+        $this->assertCount(7, $plugins, 'Not enough plugins: ' . '###');
     }
 
     public function testValidByGeneralPlugin()
@@ -257,7 +257,7 @@ class ImportTest extends TestCase
 
         $plugins = $this->allSnuffRepos('pluginRepo');
         // 1 - PluginExportByField +2 PluginEmpty from export
-        $this->assertCount(3, $plugins, 'Not enough plugins: ' . print_r($plugins, true));
+        $this->assertCount(3, $plugins, 'Not enough plugins: ' . '###');
     }
 
     protected function selfInstall(OutputInterface  $output): void

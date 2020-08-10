@@ -23,6 +23,8 @@ class PluginImport extends Plugin implements IStageInstall
     public const SECTION__IMPORT = 'import';
     public const SECTION__EXPORT = 'export';
 
+    protected array $export = [];
+
     /**
      * @param array $packages
      * @param array $generatedData
@@ -52,29 +54,44 @@ class PluginImport extends Plugin implements IStageInstall
         }
 
         $byName = array_column($packages, null, 'name');
-        $export = [];
         $from = $import->getFrom();
-        $onMiss = $import->getParameterValue($import::PARAM__ON_MISS_PACKAGE, $import::ON_MISS__CONTINUE);
 
         foreach ($from as $exportPackageName => $importList) {
-            if ($this->canBeExported($byName, $exportPackageName)) {
-                $export[$exportPackageName] = $this->constructExport(
-                    $exportPackageName,
-                    $byName[$exportPackageName][static::SECTION__EXPORT],
-                    $importList,
-                    $import
-                );
-            } elseif ($onMiss == $import::ON_MISS__CONTINUE) {
+            if (!$this->isPreparedPackage($byName, $exportPackageName, $import, $importList)) {
                 continue;
-            } else {
-                throw new MissedOrUnknown(
-                    'package "' . $exportPackageName . '" for export or section "' . static::SECTION__EXPORT . '"'
-                );
             }
         }
 
+        return $this->export;
+    }
 
-        return $export;
+    /**
+     * @param array $byName
+     * @param string $packageName
+     * @param IPackageImport $import
+     * @param $importList
+     * @return bool
+     * @throws MissedOrUnknown
+     */
+    protected function isPreparedPackage(array $byName, string $packageName, IPackageImport $import, $importList): bool
+    {
+        $onMiss = $import->getParameterValue($import::PARAM__ON_MISS_PACKAGE, $import::ON_MISS__CONTINUE);
+
+        if ($this->canBeExported($byName, $packageName)) {
+            $this->export[$packageName] = $this->constructExport(
+                $packageName,
+                $byName[$packageName][static::SECTION__EXPORT],
+                $importList,
+                $import
+            );
+            return true;
+        } elseif ($onMiss == IPackageImport::ON_MISS__CONTINUE) {
+            return false;
+        }
+
+        throw new MissedOrUnknown(
+            'package "' . $packageName . '" for export or section "' . static::SECTION__EXPORT . '"'
+        );
     }
 
     /**
