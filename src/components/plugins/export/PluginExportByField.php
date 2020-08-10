@@ -26,11 +26,9 @@ class PluginExportByField extends Plugin implements IStagePackageExportBuild
     {
         if (is_string($sectionList)) {
             return $this->setSingle($export, $exportPackage[$sectionName], $sectionName, $sectionList);
-        } elseif (is_array($sectionList)) {
-            return $this->setMultiple($export, $exportPackage[$sectionName], $sectionName, $sectionList);
         }
 
-        return false;
+        return $this->setMultiple($export, $exportPackage[$sectionName], $sectionName, $sectionList);
     }
 
     /**
