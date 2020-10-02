@@ -18,8 +18,5 @@
   },
   "scripts": {
     "test": "vendor/bin/phpunit --testdox --coverage-clover=coverage.xml --whitelist=src tests"
-  },
-  "bin": [
-    "src/bin/extas"
-  ]
+  }
 }
