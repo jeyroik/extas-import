@@ -1,3 +1,7 @@
+# 0.1.1
+
+- Removed redundant.
+
 # 0.1.0
 
 - Project initialized.
